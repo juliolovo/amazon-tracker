@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Price Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f4f4f2;
+    --surface: #fcfcfb;
+    --border: #e4e3df;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #8a8984;
+    --grid: #ecebe7;
+    --series-1: #2a78d6;
+    --target: #0ca30c;
+    --good-text: #006300;
+    --good-bg: #e3f4e3;
+    --neutral-bg: #f0efec;
+    --critical: #d03b3b;
+    --critical-bg: #fbe9e9;
+    --lvl-0: #d03b3b;  /* rojo: no ha bajado 25 % */
+    --lvl-1: #eb6834;  /* naranja: >= 25 % del camino */
+    --lvl-2: #eda100;  /* amarillo: >= 50 % */
+    --lvl-3: #2a78d6;  /* azul: >= 75 % */
+    --lvl-4: #0ca30c;  /* verde: meta */
+    --lvl-ink-0: #ffffff; --lvl-ink-1: #0b0b0b; --lvl-ink-2: #0b0b0b; --lvl-ink-3: #ffffff; --lvl-ink-4: #0b0b0b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #111110;
+      --surface: #1a1a19;
+      --border: #2e2e2b;
+      --text-primary: #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted: #8f8e86;
+      --grid: #2a2a27;
+      --series-1: #3987e5;
+      --target: #0ca30c;
+      --good-text: #5fd35f;
+      --good-bg: #16301a;
+      --neutral-bg: #383835;
+      --critical: #e66767;
+      --critical-bg: #3a1d1d;
+      --lvl-0: #e66767;
+      --lvl-1: #d95926;
+      --lvl-2: #c98500;
+      --lvl-3: #3987e5;
+      --lvl-4: #0ca30c;
+      --lvl-ink-0: #0b0b0b; --lvl-ink-1: #0b0b0b; --lvl-ink-2: #0b0b0b; --lvl-ink-3: #0b0b0b; --lvl-ink-4: #0b0b0b;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #111110;
+    --surface: #1a1a19;
+    --border: #2e2e2b;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #8f8e86;
+    --grid: #2a2a27;
+    --series-1: #3987e5;
+    --target: #0ca30c;
+    --good-text: #5fd35f;
+    --good-bg: #16301a;
+    --neutral-bg: #383835;
+    --critical: #e66767;
+    --critical-bg: #3a1d1d;
+    --lvl-0: #e66767;
+    --lvl-1: #d95926;
+    --lvl-2: #c98500;
+    --lvl-3: #3987e5;
+    --lvl-4: #0ca30c;
+    --lvl-ink-0: #0b0b0b; --lvl-ink-1: #0b0b0b; --lvl-ink-2: #0b0b0b; --lvl-ink-3: #0b0b0b; --lvl-ink-4: #0b0b0b;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text-primary);
+    font: 14px/1.5 Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 32px 16px 64px; }
+
+  header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+  h1 { font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+  .sub { color: var(--text-secondary); margin-top: 2px; }
+  .actions { display: flex; gap: 8px; align-items: center; }
+  button {
+    font: inherit; font-size: 13px; color: var(--text-primary);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 12px; cursor: pointer;
+  }
+  button:hover, .btn:hover { border-color: var(--text-muted); }
+  .btn {
+    font-size: 13px; color: var(--text-primary); text-decoration: none;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 12px; white-space: nowrap;
+  }
+  .btn.primary { background: var(--series-1); border-color: var(--series-1); color: #fff; font-weight: 600; }
+  .btn.primary:hover { filter: brightness(1.08); }
+
+  .phead { display: flex; align-items: center; gap: 8px; padding: 14px 16px; }
+  .phead h2 { margin: 0; font-size: 15px; font-weight: 600; }
+  .count { font-size: 12px; font-weight: 600; color: var(--text-secondary); background: var(--neutral-bg); border-radius: 999px; padding: 1px 8px; font-variant-numeric: tabular-nums; }
+
+  .plist { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .prow { display: flex; align-items: center; gap: 14px; padding: 12px 16px; color: inherit; text-decoration: none; border-top: 1px solid var(--border); }
+  .prow:first-child { border-top: 0; }
+  .prow:hover { background: var(--neutral-bg); }
+  .prow:focus-visible { outline: 2px solid var(--series-1); outline-offset: -2px; }
+  .prow { box-shadow: 4px 0 0 var(--row-color, transparent) inset; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
+  .badge.lvl { font-variant-numeric: tabular-nums; min-width: 44px; justify-content: center; }
+
+  .progress { margin: 4px 0 16px; }
+  .ptitle { display: flex; justify-content: space-between; gap: 8px; color: var(--text-secondary); font-size: 13px; margin-bottom: 8px; }
+  .ptitle strong { color: var(--text-primary); }
+  .bar { position: relative; height: 10px; border-radius: 999px; background: var(--neutral-bg); overflow: hidden; }
+  .bar .fill { position: absolute; inset: 0 auto 0 0; border-radius: 999px; }
+  .bar .tick { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--surface); }
+  .steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-top: 8px; font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .steps div { display: flex; flex-direction: column; gap: 2px; }
+  .steps div:nth-child(n+2) { text-align: center; align-items: center; }
+  .steps div:last-child { text-align: right; align-items: flex-end; }
+  .steps .on { color: var(--text-primary); font-weight: 600; }
+  .steps span { display: inline-flex; align-items: center; gap: 4px; }
+  .thumb.sm { width: 48px; height: 48px; border-radius: 8px; padding: 3px; }
+  .pinfo { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .pname { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pprice { font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; }
+  .chev { color: var(--text-muted); font-size: 22px; line-height: 1; }
+  .back { display: inline-block; color: var(--text-secondary); text-decoration: none; margin-bottom: 12px; font-weight: 500; }
+  .back:hover { color: var(--text-primary); }
+  .card.detail .chart { height: 340px; }
+  .card.detail .tablewrap { max-height: 420px; }
+  @media (max-width: 560px) {
+    .prow { flex-wrap: wrap; gap: 8px 12px; }
+    .pinfo { flex-basis: calc(100% - 92px); }
+    .pprice { margin-left: 60px; }
+    .chev { display: none; }
+    .card.detail .chart { height: 260px; }
+  }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; min-width: 0; }
+  .card.hit { border-color: var(--lvl-4); box-shadow: 0 0 0 1px var(--lvl-4) inset; }
+  .top { display: flex; gap: 14px; align-items: flex-start; }
+  .thumb { width: 64px; height: 64px; flex: none; border-radius: 10px; background: #fff; border: 1px solid var(--border); object-fit: contain; padding: 4px; }
+  .info { min-width: 0; flex: 1; }
+  .name { font-weight: 600; color: var(--text-primary); text-decoration: none; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .name:hover { text-decoration: underline; }
+  .meta { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
+  .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .badge.good { background: var(--good-bg); color: var(--good-text); }
+  .badge.wait { background: var(--neutral-bg); color: var(--text-secondary); }
+  .badge.err { background: var(--critical-bg); color: var(--critical); }
+
+  .prices { display: flex; gap: 24px; flex-wrap: wrap; margin: 16px 0 8px; align-items: baseline; }
+  .now { font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .kv .k { color: var(--text-secondary); font-size: 12px; }
+  .kv .v { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .delta-down { color: var(--good-text); }
+
+  .chart { position: relative; height: 220px; margin-top: 8px; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; color: var(--text-secondary); font-size: 12px; margin-top: 8px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .sw { width: 16px; height: 0; border-top: 2px solid; display: inline-block; }
+  .sw.dash { border-top-style: dashed; }
+  .foot { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; gap: 8px; flex-wrap: wrap; }
+  .watch { margin-top: 12px; padding: 8px 12px; border-radius: 8px; background: var(--neutral-bg); color: var(--text-secondary); font-size: 13px; }
+  .watch strong { color: var(--text-primary); }
+  .error { color: var(--critical); font-size: 12px; margin-top: 8px; }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-variant-numeric: tabular-nums; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  th { color: var(--text-secondary); font-weight: 500; }
+  td.num, th.num { text-align: right; }
+  .tablewrap { max-height: 240px; overflow: auto; }
+
+  .empty { text-align: center; color: var(--text-secondary); padding: 64px 16px; background: var(--surface); border: 1px dashed var(--border); border-radius: 14px; }
+  code { background: var(--neutral-bg); padding: 1px 6px; border-radius: 6px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Price Tracker</h1>
+      <div class="sub" id="updated">Cargando…</div>
+    </div>
+    <div class="actions">
+      <button id="refresh" type="button">Actualizar</button>
+      <button id="theme" type="button" aria-label="Cambiar tema">◐ Tema</button>
+    </div>
+  </header>
+
+  <main id="view"></main>
+</div>
+
+<script>
+const fmt = n => n == null ? "—" : "$" + Number(n).toFixed(2);
+const fmtDate = s => new Date(s).toLocaleString("es", { dateStyle: "medium", timeStyle: "short" });
+const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const asinOf = url => (url.match(/\/(?:dp|gp\/product|gp\/aw\/d|product)\/([A-Z0-9]{10})/) || [])[1];
+
+let charts = [];
+let lastData = null;
+
+async function load() {
+  const cfg = await fetch("/data/products.json").then(r => r.json());
+  // Un archivo de histórico por producto: data/history/<ASIN>.json
+  const entries = await Promise.all(cfg.products.map(async p => {
+    const id = p.id || asinOf(p.url);
+    const h = await fetch(`/data/history/${id}.json`).then(r => r.ok ? r.json() : null).catch(() => null);
+    return [id, h];
+  }));
+  const history = Object.fromEntries(entries.filter(([, h]) => h));
+  lastData = { cfg, history };
+  render();
+}
+
+// Tramos de avance desde el precio normal hasta la meta (igual que LEVELS en tracker.py)
+const LEVELS = [
+  { min: 0, name: "Rojo", short: "Normal (0 %)", label: "Sin bajar" },
+  { min: 25, name: "Naranja", short: "25 %", label: "25 % del camino" },
+  { min: 50, name: "Amarillo", short: "50 %", label: "50 % del camino" },
+  { min: 75, name: "Azul", short: "75 %", label: "75 % del camino" },
+  { min: 100, name: "Verde", short: "Meta (100 %)", label: "En meta" },
+];
+const baseOf = (p, pts) => p.normal_price ?? (pts.length ? pts[0].price : null);
+function progressOf(p, price, pts) {
+  const base = baseOf(p, pts);
+  if (price <= p.target_price) return 100;
+  if (base == null || base <= p.target_price) return 0;
+  return Math.max(0, (base - price) / (base - p.target_price) * 100);
+}
+const levelOf = pct => LEVELS.reduce((acc, lv, i) => pct + 1e-6 >= lv.min ? i : acc, 0);
+const priceAt = (p, pts, pct) => baseOf(p, pts) - (baseOf(p, pts) - p.target_price) * pct / 100;
+
+function buildItems() {
+  const { cfg, history } = lastData;
+  return cfg.products.map(p => {
+    const id = p.id || asinOf(p.url);
+    const h = history[id] || { history: [] };
+    const pts = h.history || [];
+    const current = pts.length ? pts[pts.length - 1].price : null;
+    const min = pts.length ? Math.min(...pts.map(x => x.price)) : null;
+    const watch = p.watch ? (h.watch || { wanted: p.watch.variant, found: false, available: false }) : null;
+    const hit = watch ? watch.available : current != null && p.target_price != null && current <= p.target_price;
+    const pct = !watch && current != null && p.target_price != null ? progressOf(p, current, pts) : null;
+    const level = pct != null ? levelOf(pct) : null;
+    const name = p.name || h.title || id;
+    const link = watch && watch.found ? watch.url : p.url;
+    return { p, id, h, pts, current, min, watch, hit, name, link, pct, level };
+  });
+}
+
+function badgeHTML({ p, h, current, hit, watch, pct, level }) {
+  if (h.last_error && (current == null || watch)) return `<span class="badge err">⚠ Error</span>`;
+  if (watch) return hit ? `<span class="badge good">✓ Disponible</span>`
+    : `<span class="badge wait">${watch.found ? "Sin stock" : "Esperando"} · ${esc(watch.wanted)}</span>`;
+  if (level != null) return `<span class="badge lvl" style="background:var(--lvl-${level});color:var(--lvl-ink-${level})">${Math.floor(pct)} %</span>`;
+  return `<span class="badge wait">Sin datos</span>`;
+}
+
+function render() {
+  charts.forEach(c => c.destroy());
+  charts = [];
+  const items = buildItems();
+
+  const checks = Object.values(lastData.history).map(h => h.last_check).filter(Boolean).sort();
+  document.getElementById("updated").textContent = checks.length
+    ? "Última revisión: " + fmtDate(checks[checks.length - 1])
+    : "Aún no hay datos. Ejecuta: python tracker.py";
+
+  // Navegación por hash: "#/ASIN" muestra el detalle, sin hash muestra la lista
+  const selected = items.find(i => i.id === decodeURIComponent(location.hash.replace(/^#\/?/, "")));
+  const view = document.getElementById("view");
+  view.innerHTML = selected ? detailHTML(selected) : listHTML(items);
+
+  if (selected) {
+    const b = view.querySelector("[data-table]");
+    b.addEventListener("click", () => {
+      const t = view.querySelector(".tablewrap");
+      t.hidden = !t.hidden;
+      b.textContent = t.hidden ? "Ver tabla" : "Ver gráfico";
+      view.querySelector(".chart").hidden = !t.hidden;
+      view.querySelector(".legend").hidden = !t.hidden;
+    });
+    charts.push(drawChart(view.querySelector("canvas"), selected));
+    document.title = selected.name + " · Price Tracker";
+  } else {
+    document.title = "Price Tracker";
+  }
+}
+
+function listHTML(items) {
+  if (!items.length) {
+    return `<div class="empty">No hay productos. Agrega uno con<br><code>python tracker.py add URL --target 25 --normal 32.99</code></div>`;
+  }
+  return `
+  <nav class="plist" aria-label="Productos">
+    <div class="phead"><h2>Productos</h2><span class="count">${items.length}</span></div>
+    ${items.map(it => `
+    <a class="prow" href="#/${encodeURIComponent(it.id)}"${it.level != null ? ` style="--row-color:var(--lvl-${it.level})"` : ""}>
+      ${it.h.image ? `<img class="thumb sm" src="${esc(it.h.image)}" alt="">` : `<span class="thumb sm"></span>`}
+      <span class="pinfo">
+        <span class="pname">${esc(it.name)}</span>
+        <span class="meta">${esc(it.id)} · ${it.watch ? `vigila color ${esc(it.watch.wanted)}` : `meta ${fmt(it.p.target_price)}${it.current != null && it.current > it.p.target_price ? ` · faltan ${fmt(it.current - it.p.target_price)}` : ""}`}</span>
+      </span>
+      <span class="pprice">${fmt(it.current)}</span>
+      ${badgeHTML(it)}
+      <span class="chev" aria-hidden="true">›</span>
+    </a>`).join("")}
+  </nav>`;
+}
+
+function detailHTML(it) {
+  const { p, h, current, min, hit, watch, name, link } = it;
+  const diff = current != null && p.normal_price ? (current - p.normal_price) / p.normal_price * 100 : null;
+  return `
+  <a class="back" href="#/">← Todos los productos</a>
+  <article class="card detail ${hit ? "hit" : ""}">
+    <div class="top">
+      ${h.image ? `<img class="thumb" src="${esc(h.image)}" alt="">` : ""}
+      <div class="info">
+        <a class="name" href="${esc(link)}" target="_blank" rel="noopener" title="${esc(h.title || name)}">${esc(name)}</a>
+        <div class="meta">${esc(it.id)}${h.availability && !watch ? " · " + esc(h.availability) : ""}</div>
+      </div>
+      ${badgeHTML(it)}
+    </div>
+    ${watch ? `<div class="watch">Vigilando la variante <strong>${esc(watch.wanted)}</strong>: ${
+      watch.available ? `disponible${watch.source === "búsqueda" ? " en otra publicación" : ""}`
+      : watch.found ? "existe pero sin stock" : "aún no está a la venta"}.</div>` : ""}
+    <div class="prices">
+      <div class="now">${fmt(current)}</div>
+      ${p.target_price != null ? `<div class="kv"><div class="k">Meta</div><div class="v">${fmt(p.target_price)}</div></div>` : ""}
+      ${p.normal_price != null ? `<div class="kv"><div class="k">Normal</div><div class="v">${fmt(p.normal_price)}</div></div>` : ""}
+      <div class="kv"><div class="k">Mínimo</div><div class="v">${fmt(min)}</div></div>
+      ${diff != null ? `<div class="kv"><div class="k">vs. normal</div><div class="v ${diff < 0 ? "delta-down" : ""}">${diff > 0 ? "+" : ""}${diff.toFixed(1)}%</div></div>` : ""}
+    </div>
+    ${it.level != null ? `
+    <div class="progress">
+      <div class="ptitle"><span>Progreso hacia la meta</span><span class="badge lvl" style="background:var(--lvl-${it.level});color:var(--lvl-ink-${it.level})">${Math.floor(it.pct)} %</span></div>
+      <div class="bar" role="progressbar" aria-valuenow="${Math.floor(it.pct)}" aria-valuemin="0" aria-valuemax="100">
+        <div class="fill" style="width:${Math.min(100, it.pct)}%;background:var(--lvl-${it.level})"></div>
+        ${[25, 50, 75].map(t => `<i class="tick" style="left:calc(${t}% - 1px)"></i>`).join("")}
+      </div>
+      <div class="steps">${LEVELS.map((lv, i) => `<div class="${i <= it.level ? "on" : ""}">
+        <span><i class="dot" style="background:var(--lvl-${i})"></i>${lv.min} %</span>${fmt(priceAt(p, it.pts, lv.min))}</div>`).join("")}</div>
+    </div>` : ""}
+    ${h.last_error ? `<div class="error">Última revisión falló: ${esc(h.last_error)}</div>` : ""}
+    <div class="chart"><canvas aria-label="Historial de precio de ${esc(name)}" role="img"></canvas></div>
+    <div class="legend">
+      <span><i class="sw" style="border-color:var(--text-primary)"></i>Precio</span>
+      ${it.level != null ? LEVELS.map((lv, i) => `<span><i class="sw dash" style="border-color:var(--lvl-${i})"></i>${lv.short}</span>`).join("") : ""}
+    </div>
+    <div class="foot">
+      <span class="meta">${h.last_check ? "Revisado " + fmtDate(h.last_check) : ""}</span>
+      <span class="actions">
+        <button type="button" data-table>Ver tabla</button>
+        <a class="btn primary" href="${esc(link)}" target="_blank" rel="noopener">Ver en Amazon ↗</a>
+      </span>
+    </div>
+    <div class="tablewrap" hidden>
+      <table><thead><tr><th>Fecha</th><th class="num">Precio</th></tr></thead>
+      <tbody>${[...it.pts].reverse().map(x => `<tr><td>${fmtDate(x.ts)}</td><td class="num">${fmt(x.price)}</td></tr>`).join("")}</tbody></table>
+    </div>
+  </article>`;
+}
+
+// Línea vertical que sigue al cursor
+const crosshair = {
+  id: "crosshair",
+  afterDatasetsDraw(chart) {
+    const a = chart.tooltip?.getActiveElements?.();
+    if (!a || !a.length) return;
+    const { ctx, chartArea } = chart;
+    const x = a[0].element.x;
+    ctx.save();
+    ctx.strokeStyle = css("--text-muted");
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x, chartArea.top); ctx.lineTo(x, chartArea.bottom); ctx.stroke();
+    ctx.restore();
+  },
+};
+
+function drawChart(canvas, it) {
+  const { p, pts } = it;
+  const series = pts.map(x => ({ x: new Date(x.ts), y: x.price }));
+  const xs = series.length ? series.map(s => s.x) : [new Date()];
+  const xMin = new Date(Math.min(...xs)), xMax = new Date(Math.max(...xs));
+  if (+xMin === +xMax) { xMin.setHours(xMin.getHours() - 12); xMax.setHours(xMax.getHours() + 12); }
+  const ref = y => [{ x: xMin, y }, { x: xMax, y }];
+
+  const ys = [...series.map(s => s.y), p.target_price, p.normal_price].filter(v => v != null);
+  if (!ys.length) ys.push(0, 10);  // producto vigilado sin precios todavía
+  const pad = Math.max(1, (Math.max(...ys) - Math.min(...ys)) * 0.15);
+
+  const datasets = [{
+    label: "Precio", data: series, borderColor: css("--text-primary"), backgroundColor: css("--text-primary"),
+    borderWidth: 2, pointRadius: series.length > 40 ? 0 : 3, pointHoverRadius: 5, pointBorderColor: css("--surface"),
+    pointBorderWidth: 2, stepped: "before", tension: 0,
+  }];
+  // Una línea por tramo: normal (rojo), 25 % (naranja), 50 % (amarillo), 75 % (azul), meta (verde)
+  if (it.level != null) LEVELS.forEach((lv, i) => datasets.push({
+    label: lv.short, data: ref(priceAt(p, pts, lv.min)), borderColor: css(`--lvl-${i}`),
+    borderDash: i === 0 || i === 4 ? [6, 4] : [2, 4], borderWidth: i === 0 || i === 4 ? 1.5 : 1.25,
+    pointRadius: 0, pointHoverRadius: 0,
+  }));
+
+  return new Chart(canvas, {
+    type: "line",
+    data: { datasets },
+    plugins: [crosshair],
+    options: {
+      maintainAspectRatio: false,
+      animation: false,
+      interaction: { mode: "nearest", axis: "x", intersect: false },
+      scales: {
+        x: {
+          type: "time", min: xMin, max: xMax,
+          time: { tooltipFormat: "PPp" },
+          grid: { display: false }, border: { color: css("--border") },
+          ticks: { color: css("--text-muted"), maxTicksLimit: 6, font: { family: "Inter", size: 11 } },
+        },
+        y: {
+          suggestedMin: Math.min(...ys) - pad, suggestedMax: Math.max(...ys) + pad,
+          grid: { color: css("--grid") }, border: { display: false },
+          ticks: { color: css("--text-muted"), callback: v => "$" + v, maxTicksLimit: 5, font: { family: "Inter", size: 11 } },
+        },
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          filter: i => i.datasetIndex === 0,
+          backgroundColor: css("--surface"), titleColor: css("--text-primary"), bodyColor: css("--text-secondary"),
+          borderColor: css("--border"), borderWidth: 1, padding: 10, displayColors: false,
+          titleFont: { family: "Inter", weight: "600" }, bodyFont: { family: "Inter" },
+          callbacks: {
+            label: c => [`Precio: ${fmt(c.parsed.y)}`].concat(it.level != null
+              ? [`${Math.floor(progressOf(p, c.parsed.y, pts))} % del camino · meta ${fmt(p.target_price)}`] : [])
+              .concat(p.normal_price ? [`Normal: ${fmt(p.normal_price)}`] : []),
+          },
+        },
+      },
+    },
+  });
+}
+
+document.getElementById("refresh").addEventListener("click", load);
+window.addEventListener("hashchange", () => { if (lastData) { render(); window.scrollTo(0, 0); } });
+document.getElementById("theme").addEventListener("click", () => {
+  const root = document.documentElement;
+  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+  try { localStorage.setItem("theme", root.dataset.theme); } catch {}
+  render();
+});
+try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => lastData && render());
+
+load().catch(e => { document.getElementById("updated").textContent = "Error cargando datos: " + e.message; });
+setInterval(() => load().catch(() => {}), 60000);
+</script>
+</body>
+</html>

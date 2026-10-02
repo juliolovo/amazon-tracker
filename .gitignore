@@ -1,0 +1,6 @@
+data/browser-profile/
+data/*.tmp
+data/history/*.tmp
+data/*.bak
+logs/
+__pycache__/

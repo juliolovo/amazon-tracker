@@ -1,0 +1,40 @@
+{
+  "settings": {
+    "notification": "toast",
+    "browser_channel": "msedge",
+    "headless": true
+  },
+  "products": [
+    {
+      "id": "B075TF61VH",
+      "name": "Tommy Hilfiger Orson RFID Wallet",
+      "url": "https://www.amazon.com/gp/product/B075TF61VH/ref=ox_sc_act_title_7?smid=ATVPDKIKX0DER&th=1",
+      "normal_price": 32.99,
+      "target_price": 25.0
+    },
+    {
+      "id": "B0001P14X6",
+      "name": "Victorinox Compact Swiss Army Knife (Red)",
+      "url": "https://www.amazon.com/gp/product/B0001P14X6/ref=ox_sc_saved_image_1?smid=ATVPDKIKX0DER&psc=1",
+      "normal_price": 47.92,
+      "target_price": 40.0
+    },
+    {
+      "id": "B006M9NIEI",
+      "name": "Gerber Dime Multitool (Red)",
+      "url": "https://www.amazon.com/gp/product/B006M9NIEI/ref=ox_sc_saved_image_2?smid=ATVPDKIKX0DER&th=1",
+      "normal_price": 34.99,
+      "target_price": 20.0
+    },
+    {
+      "id": "B0F83V4NW6",
+      "name": "OLIGHT i3E EOS — negro",
+      "url": "https://www.amazon.com/gp/product/B0F83V4NW6/ref=ox_sc_saved_image_7?th=1",
+      "watch": {
+        "variant": "Black",
+        "search": "OLIGHT i3E EOS black",
+        "keywords": ["olight", "i3e", "eos", "black"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "B006M9NIEI",
+  "history": [
+    {
+      "ts": "2026-10-02T13:17:49",
+      "price": 27.99
+    },
+    {
+      "ts": "2026-10-02T13:31:00",
+      "price": 27.99
+    }
+  ],
+  "last_check": "2026-10-02T13:31:00",
+  "title": "Gerber Dime 12-in-1 Mini Multitool Pliers, Pocket Knife, Bottle Opener, Red",
+  "image": "https://m.media-amazon.com/images/I/71+9qeqgu8L._AC_SX569_.jpg",
+  "availability": "In Stock",
+  "last_error": null,
+  "last_alert_price": null,
+  "progress": 46.7,
+  "level": 1,
+  "last_level": 1
+}
