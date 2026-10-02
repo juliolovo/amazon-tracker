@@ -27,10 +27,10 @@
     --critical-bg: #fbe9e9;
     --lvl-0: #d03b3b;  /* rojo: no ha bajado 25 % */
     --lvl-1: #eb6834;  /* naranja: >= 25 % del camino */
-    --lvl-2: #eda100;  /* amarillo: >= 50 % */
-    --lvl-3: #2a78d6;  /* azul: >= 75 % */
+    --lvl-2: #2a78d6;  /* azul: >= 50 % */
+    --lvl-3: #0ca30c;  /* verde: >= 75 % */
     --lvl-4: #0ca30c;  /* verde: meta */
-    --lvl-ink-0: #ffffff; --lvl-ink-1: #0b0b0b; --lvl-ink-2: #0b0b0b; --lvl-ink-3: #ffffff; --lvl-ink-4: #0b0b0b;
+    --lvl-ink-0: #ffffff; --lvl-ink-1: #0b0b0b; --lvl-ink-2: #ffffff; --lvl-ink-3: #0b0b0b; --lvl-ink-4: #0b0b0b;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -51,8 +51,8 @@
       --critical-bg: #3a1d1d;
       --lvl-0: #e66767;
       --lvl-1: #d95926;
-      --lvl-2: #c98500;
-      --lvl-3: #3987e5;
+      --lvl-2: #3987e5;
+      --lvl-3: #0ca30c;
       --lvl-4: #0ca30c;
       --lvl-ink-0: #0b0b0b; --lvl-ink-1: #0b0b0b; --lvl-ink-2: #0b0b0b; --lvl-ink-3: #0b0b0b; --lvl-ink-4: #0b0b0b;
     }
@@ -75,8 +75,8 @@
     --critical-bg: #3a1d1d;
     --lvl-0: #e66767;
     --lvl-1: #d95926;
-    --lvl-2: #c98500;
-    --lvl-3: #3987e5;
+    --lvl-2: #3987e5;
+    --lvl-3: #0ca30c;
     --lvl-4: #0ca30c;
     --lvl-ink-0: #0b0b0b; --lvl-ink-1: #0b0b0b; --lvl-ink-2: #0b0b0b; --lvl-ink-3: #0b0b0b; --lvl-ink-4: #0b0b0b;
   }
@@ -122,25 +122,21 @@
   .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
   .badge.lvl { font-variant-numeric: tabular-nums; min-width: 44px; justify-content: center; }
 
-  .progress { margin: 4px 0 16px; }
-  .ptitle { display: flex; justify-content: space-between; gap: 8px; color: var(--text-secondary); font-size: 13px; margin-bottom: 8px; }
-  .ptitle strong { color: var(--text-primary); }
+  .progress { margin: 4px 0 16px; padding: 0 8px; }
+  .track { position: relative; }
   .bar { position: relative; height: 10px; border-radius: 999px; background: var(--neutral-bg); overflow: hidden; }
   .bar .fill { position: absolute; inset: 0 auto 0 0; border-radius: 999px; }
-  .bar .tick { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--surface); }
-  .steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-top: 8px; font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
-  .steps div { display: flex; flex-direction: column; gap: 2px; }
-  .steps div:nth-child(n+2) { text-align: center; align-items: center; }
-  .steps div:last-child { text-align: right; align-items: flex-end; }
-  .steps .on { color: var(--text-primary); font-weight: 600; }
-  .steps span { display: inline-flex; align-items: center; gap: 4px; }
+  .node { position: absolute; top: 50%; width: 14px; height: 14px; border-radius: 50%; transform: translate(-50%, -50%); background: var(--surface); border: 2px solid var(--lvl); box-sizing: border-box; }
+  .node.on { background: var(--lvl); box-shadow: 0 0 0 2px var(--surface); }
+  .labels { position: relative; height: 18px; margin-top: 8px; font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .labels span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+  .labels .on { color: var(--text-primary); font-weight: 600; }
   .thumb.sm { width: 48px; height: 48px; border-radius: 8px; padding: 3px; }
   .pinfo { flex: 1; min-width: 0; display: flex; flex-direction: column; }
   .pname { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .pprice { font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; }
   .chev { color: var(--text-muted); font-size: 22px; line-height: 1; }
-  .back { display: inline-block; color: var(--text-secondary); text-decoration: none; margin-bottom: 12px; font-weight: 500; }
-  .back:hover { color: var(--text-primary); }
+  .foot { margin-top: 10px; }
   .card.detail .chart { height: 340px; }
   .card.detail .tablewrap { max-height: 420px; }
   @media (max-width: 560px) {
@@ -153,6 +149,8 @@
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; min-width: 0; }
   .card.hit { border-color: var(--lvl-4); box-shadow: 0 0 0 1px var(--lvl-4) inset; }
   .top { display: flex; gap: 14px; align-items: flex-start; }
+  .top .actions { margin-left: auto; flex: none; }
+  @media (max-width: 560px) { .top { flex-wrap: wrap; } .top .info { flex-basis: calc(100% - 72px); } .top .actions { margin-left: 0; } }
   .thumb { width: 64px; height: 64px; flex: none; border-radius: 10px; background: #fff; border: 1px solid var(--border); object-fit: contain; padding: 4px; }
   .info { min-width: 0; flex: 1; }
   .name { font-weight: 600; color: var(--text-primary); text-decoration: none; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -163,18 +161,20 @@
   .badge.wait { background: var(--neutral-bg); color: var(--text-secondary); }
   .badge.err { background: var(--critical-bg); color: var(--critical); }
 
-  .prices { display: flex; gap: 24px; flex-wrap: wrap; margin: 16px 0 8px; align-items: baseline; }
+  .prices { display: flex; gap: 24px; flex-wrap: wrap; margin: 16px 0 8px; align-items: center; }
   .now { font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
   .kv .k { color: var(--text-secondary); font-size: 12px; }
   .kv .v { font-weight: 600; font-variant-numeric: tabular-nums; }
   .delta-down { color: var(--good-text); }
 
   .chart { position: relative; height: 220px; margin-top: 8px; }
+  .tip { position: absolute; pointer-events: none; opacity: 0; z-index: 2; white-space: nowrap; padding: 8px 10px; font-size: 12px; font-variant-numeric: tabular-nums; color: var(--text-secondary); background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+  .tip .tt { font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+  .tip b { font-weight: 700; }
   .legend { display: flex; gap: 16px; flex-wrap: wrap; color: var(--text-secondary); font-size: 12px; margin-top: 8px; }
   .legend span { display: inline-flex; align-items: center; gap: 6px; }
   .sw { width: 16px; height: 0; border-top: 2px solid; display: inline-block; }
   .sw.dash { border-top-style: dashed; }
-  .foot { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; gap: 8px; flex-wrap: wrap; }
   .watch { margin-top: 12px; padding: 8px 12px; border-radius: 8px; background: var(--neutral-bg); color: var(--text-secondary); font-size: 13px; }
   .watch strong { color: var(--text-primary); }
   .error { color: var(--critical); font-size: 12px; margin-top: 8px; }
@@ -232,8 +232,8 @@ async function load() {
 const LEVELS = [
   { min: 0, name: "Rojo", short: "Normal (0 %)", label: "Sin bajar" },
   { min: 25, name: "Naranja", short: "25 %", label: "25 % del camino" },
-  { min: 50, name: "Amarillo", short: "50 %", label: "50 % del camino" },
-  { min: 75, name: "Azul", short: "75 %", label: "75 % del camino" },
+  { min: 50, name: "Azul", short: "50 %", label: "50 % del camino" },
+  { min: 75, name: "Verde", short: "75 %", label: "75 % del camino" },
   { min: 100, name: "Verde", short: "Meta (100 %)", label: "En meta" },
 ];
 const baseOf = (p, pts) => p.normal_price ?? (pts.length ? pts[0].price : null);
@@ -248,19 +248,23 @@ const priceAt = (p, pts, pct) => baseOf(p, pts) - (baseOf(p, pts) - p.target_pri
 
 function buildItems() {
   const { cfg, history } = lastData;
-  return cfg.products.map(p => {
-    const id = p.id || asinOf(p.url);
+  return cfg.products.map(cp => {
+    const id = cp.id || asinOf(cp.url);
     const h = history[id] || { history: [] };
+    // Precio normal: el de products.json, o el List Price visto en el primer scraping
+    const p = { ...cp, normal_price: cp.normal_price ?? h.normal_price ?? null };
     const pts = h.history || [];
     const current = pts.length ? pts[pts.length - 1].price : null;
-    const min = pts.length ? Math.min(...pts.map(x => x.price)) : null;
+    const prices = [...pts.map(x => x.price), ...[current, p.normal_price].filter(v => v != null)];  // el precio normal cuenta como histórico
+    const min = prices.length ? Math.min(...prices) : null;
+    const max = prices.length ? Math.max(...prices) : null;
     const watch = p.watch ? (h.watch || { wanted: p.watch.variant, found: false, available: false }) : null;
     const hit = watch ? watch.available : current != null && p.target_price != null && current <= p.target_price;
     const pct = !watch && current != null && p.target_price != null ? progressOf(p, current, pts) : null;
     const level = pct != null ? levelOf(pct) : null;
     const name = p.name || h.title || id;
     const link = watch && watch.found ? watch.url : p.url;
-    return { p, id, h, pts, current, min, watch, hit, name, link, pct, level };
+    return { p, id, h, pts, current, min, max, watch, hit, name, link, pct, level };
   });
 }
 
@@ -285,6 +289,7 @@ function render() {
   // Navegación por hash: "#/ASIN" muestra el detalle, sin hash muestra la lista
   const selected = items.find(i => i.id === decodeURIComponent(location.hash.replace(/^#\/?/, "")));
   const view = document.getElementById("view");
+  document.querySelector("header").hidden = !!selected;
   view.innerHTML = selected ? detailHTML(selected) : listHTML(items);
 
   if (selected) {
@@ -324,11 +329,17 @@ function listHTML(items) {
   </nav>`;
 }
 
+// Relleno de la barra: cada tramo de 25 % en su color; rojo, naranja, azul (desde 50 %) y verde (desde 75 %)
+function fillStyle({ pct, level }) {
+  const w = Math.max(0.01, Math.min(100, pct));
+  const c = [0, 1, 2, 3];
+  const stops = c.map((lv, i) => `var(--lvl-${lv}) ${i * 25}% ${(i + 1) * 25}%`).join(",");
+  return `width:${w}%;background:linear-gradient(to right,${stops});background-size:${10000 / w}% 100%;background-repeat:no-repeat`;
+}
+
 function detailHTML(it) {
-  const { p, h, current, min, hit, watch, name, link } = it;
-  const diff = current != null && p.normal_price ? (current - p.normal_price) / p.normal_price * 100 : null;
+  const { p, h, current, min, max, hit, watch, name, link } = it;
   return `
-  <a class="back" href="#/">← Todos los productos</a>
   <article class="card detail ${hit ? "hit" : ""}">
     <div class="top">
       ${h.image ? `<img class="thumb" src="${esc(h.image)}" alt="">` : ""}
@@ -336,40 +347,40 @@ function detailHTML(it) {
         <a class="name" href="${esc(link)}" target="_blank" rel="noopener" title="${esc(h.title || name)}">${esc(name)}</a>
         <div class="meta">${esc(it.id)}${h.availability && !watch ? " · " + esc(h.availability) : ""}</div>
       </div>
-      ${badgeHTML(it)}
+      <span class="actions">
+        <a class="btn" href="#/">← Todos los productos</a>
+        <button type="button" data-table>Ver tabla</button>
+        <a class="btn primary" href="${esc(link)}" target="_blank" rel="noopener">Ver en Amazon ↗</a>
+      </span>
     </div>
     ${watch ? `<div class="watch">Vigilando la variante <strong>${esc(watch.wanted)}</strong>: ${
       watch.available ? `disponible${watch.source === "búsqueda" ? " en otra publicación" : ""}`
       : watch.found ? "existe pero sin stock" : "aún no está a la venta"}.</div>` : ""}
     <div class="prices">
       <div class="now">${fmt(current)}</div>
-      ${p.target_price != null ? `<div class="kv"><div class="k">Meta</div><div class="v">${fmt(p.target_price)}</div></div>` : ""}
       ${p.normal_price != null ? `<div class="kv"><div class="k">Normal</div><div class="v">${fmt(p.normal_price)}</div></div>` : ""}
       <div class="kv"><div class="k">Mínimo</div><div class="v">${fmt(min)}</div></div>
-      ${diff != null ? `<div class="kv"><div class="k">vs. normal</div><div class="v ${diff < 0 ? "delta-down" : ""}">${diff > 0 ? "+" : ""}${diff.toFixed(1)}%</div></div>` : ""}
+      <div class="kv"><div class="k">Máximo</div><div class="v">${fmt(max)}</div></div>
+      ${badgeHTML(it)}
     </div>
     ${it.level != null ? `
     <div class="progress">
-      <div class="ptitle"><span>Progreso hacia la meta</span><span class="badge lvl" style="background:var(--lvl-${it.level});color:var(--lvl-ink-${it.level})">${Math.floor(it.pct)} %</span></div>
-      <div class="bar" role="progressbar" aria-valuenow="${Math.floor(it.pct)}" aria-valuemin="0" aria-valuemax="100">
-        <div class="fill" style="width:${Math.min(100, it.pct)}%;background:var(--lvl-${it.level})"></div>
-        ${[25, 50, 75].map(t => `<i class="tick" style="left:calc(${t}% - 1px)"></i>`).join("")}
+      <div class="track">
+        <div class="bar" role="progressbar" aria-valuenow="${Math.floor(it.pct)}" aria-valuemin="0" aria-valuemax="100">
+          <div class="fill" style="${fillStyle(it)}"></div>
+        </div>
+        ${LEVELS.map((lv, i) => `<i class="node ${i <= it.level ? "on" : ""}" style="left:${lv.min}%;--lvl:var(--lvl-${i})"></i>`).join("")}
       </div>
-      <div class="steps">${LEVELS.map((lv, i) => `<div class="${i <= it.level ? "on" : ""}">
-        <span><i class="dot" style="background:var(--lvl-${i})"></i>${lv.min} %</span>${fmt(priceAt(p, it.pts, lv.min))}</div>`).join("")}</div>
+      <div class="labels">${LEVELS.map((lv, i) => `<span class="${i <= it.level ? "on" : ""}" style="left:${lv.min}%">${lv.min} %</span>`).join("")}</div>
     </div>` : ""}
     ${h.last_error ? `<div class="error">Última revisión falló: ${esc(h.last_error)}</div>` : ""}
     <div class="chart"><canvas aria-label="Historial de precio de ${esc(name)}" role="img"></canvas></div>
     <div class="legend">
-      <span><i class="sw" style="border-color:var(--text-primary)"></i>Precio</span>
+      <span><i class="sw" style="border-color:var(--text-primary)"></i>Actual</span>
       ${it.level != null ? LEVELS.map((lv, i) => `<span><i class="sw dash" style="border-color:var(--lvl-${i})"></i>${lv.short}</span>`).join("") : ""}
     </div>
     <div class="foot">
       <span class="meta">${h.last_check ? "Revisado " + fmtDate(h.last_check) : ""}</span>
-      <span class="actions">
-        <button type="button" data-table>Ver tabla</button>
-        <a class="btn primary" href="${esc(link)}" target="_blank" rel="noopener">Ver en Amazon ↗</a>
-      </span>
     </div>
     <div class="tablewrap" hidden>
       <table><thead><tr><th>Fecha</th><th class="num">Precio</th></tr></thead>
@@ -411,7 +422,7 @@ function drawChart(canvas, it) {
     borderWidth: 2, pointRadius: series.length > 40 ? 0 : 3, pointHoverRadius: 5, pointBorderColor: css("--surface"),
     pointBorderWidth: 2, stepped: "before", tension: 0,
   }];
-  // Una línea por tramo: normal (rojo), 25 % (naranja), 50 % (amarillo), 75 % (azul), meta (verde)
+  // Una línea por tramo: normal (rojo), 25 % (naranja), 50 % (azul), 75 % y meta (verde)
   if (it.level != null) LEVELS.forEach((lv, i) => datasets.push({
     label: lv.short, data: ref(priceAt(p, pts, lv.min)), borderColor: css(`--lvl-${i}`),
     borderDash: i === 0 || i === 4 ? [6, 4] : [2, 4], borderWidth: i === 0 || i === 4 ? 1.5 : 1.25,
@@ -446,10 +457,23 @@ function drawChart(canvas, it) {
           backgroundColor: css("--surface"), titleColor: css("--text-primary"), bodyColor: css("--text-secondary"),
           borderColor: css("--border"), borderWidth: 1, padding: 10, displayColors: false,
           titleFont: { family: "Inter", weight: "600" }, bodyFont: { family: "Inter" },
-          callbacks: {
-            label: c => [`Precio: ${fmt(c.parsed.y)}`].concat(it.level != null
-              ? [`${Math.floor(progressOf(p, c.parsed.y, pts))} % del camino · meta ${fmt(p.target_price)}`] : [])
-              .concat(p.normal_price ? [`Normal: ${fmt(p.normal_price)}`] : []),
+          enabled: false,
+          external: ({ chart, tooltip }) => {
+            const wrap = chart.canvas.parentNode;
+            let el = wrap.querySelector(".tip");
+            if (!el) { el = document.createElement("div"); el.className = "tip"; wrap.appendChild(el); }
+            if (tooltip.opacity === 0 || !tooltip.dataPoints?.length) { el.style.opacity = 0; return; }
+            const y = tooltip.dataPoints[0].parsed.y;
+            const pct = it.level != null ? Math.floor(progressOf(p, y, pts)) : null;
+            el.innerHTML = `<div class="tt">${esc(tooltip.title.join(" "))}</div>
+              <div>Actual ${fmt(y)}${pct != null ? ` <b style="color:var(--lvl-${levelOf(pct)})">(${pct}%)</b>` : ""}</div>
+              ${p.normal_price != null ? `<div>Normal ${fmt(p.normal_price)}</div>` : ""}
+              <div>Mínimo ${fmt(it.min)}</div>
+              <div>Máximo ${fmt(it.max)}</div>`;
+            el.style.opacity = 1;
+            const w = el.offsetWidth;
+            el.style.left = Math.max(0, Math.min(chart.width - w, tooltip.caretX - w / 2)) + "px";
+            el.style.top = Math.max(0, tooltip.caretY - el.offsetHeight - 12) + "px";
           },
         },
       },

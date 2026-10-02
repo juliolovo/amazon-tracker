@@ -55,6 +55,16 @@ PRICE_SELECTORS = [
     "span.a-price[data-a-color='price'] .a-offscreen",
 ]
 
+# Precio tachado ("List Price" / "Was")
+LIST_PRICE_SELECTORS = [
+    "#corePriceDisplay_desktop_feature_div .basisPrice .a-offscreen",
+    "#corePrice_feature_div .basisPrice .a-offscreen",
+    "span.a-price.a-text-price[data-a-strike='true'] .a-offscreen",
+    "#listPrice",
+    "#priceblock_listprice",
+    ".priceBlockStrikePriceString",
+]
+
 # pythonw.exe (Programador de tareas) no tiene consola: sys.stdout/stderr son None.
 LOG_DIR.mkdir(exist_ok=True)
 if sys.stdout is None or sys.stderr is None:
@@ -148,8 +158,8 @@ def parse_price(text):
 LEVELS = [
     {"min": 0, "color": "rojo", "emoji": "🔴", "label": "sin bajar"},
     {"min": 25, "color": "naranja", "emoji": "🟠", "label": "25 % del camino"},
-    {"min": 50, "color": "amarillo", "emoji": "🟡", "label": "50 % del camino"},
-    {"min": 75, "color": "azul", "emoji": "🔵", "label": "75 % del camino"},
+    {"min": 50, "color": "azul", "emoji": "🔵", "label": "50 % del camino"},
+    {"min": 75, "color": "verde", "emoji": "🟢", "label": "75 % del camino"},
     {"min": 100, "color": "verde", "emoji": "🟢", "label": "precio meta"},
 ]
 
@@ -158,6 +168,8 @@ def target_progress(product, price, entry):
     """% del camino recorrido desde el precio normal hasta la meta: (normal - actual) / (normal - meta)."""
     target = float(product["target_price"])
     normal = product.get("normal_price")
+    if normal is None:
+        normal = entry.get("normal_price")  # List Price visto en el primer scraping
     if normal is None and entry["history"]:
         normal = entry["history"][0]["price"]  # sin precio normal: usar el primer precio registrado
     if price <= target:
@@ -206,6 +218,17 @@ def scrape(page, url):
         if whole:
             price = parse_price(whole.text_content().strip().rstrip(".") + "." + (frac.text_content().strip() if frac else "00"))
 
+    list_price = None
+    for sel in LIST_PRICE_SELECTORS:
+        for el in page.query_selector_all(sel):
+            list_price = parse_price(el.text_content())
+            if list_price:
+                break
+        if list_price:
+            break
+    if list_price is not None and (price is None or list_price <= price):
+        list_price = None  # un "precio de lista" que no es mayor al actual no sirve como normal
+
     img_el = page.query_selector("#landingImage") or page.query_selector("#imgBlkFront")
     image = img_el.get_attribute("src") if img_el else None
 
@@ -215,7 +238,7 @@ def scrape(page, url):
                and bool(page.query_selector("#add-to-cart-button, #buy-now-button"))
                and "unavailable" not in (availability or "").lower())
 
-    return {"title": title, "price": price, "image": image, "availability": availability,
+    return {"title": title, "price": price, "list_price": list_price, "image": image, "availability": availability,
             "buyable": buyable, "variants": scrape_variants(page)}
 
 
@@ -373,6 +396,10 @@ def cmd_track(_args):
                 entry["title"] = result["title"] or entry.get("title")
                 entry["image"] = result["image"] or entry.get("image")
                 entry["availability"] = result["availability"]
+                if "normal_price" not in entry and not product.get("watch"):
+                    entry["normal_price"] = result["list_price"]  # solo en el primer scraping; null si no tiene List Price
+                    if result["list_price"] is not None:
+                        log.info("%s: List Price $%.2f usado como precio normal", pid, result["list_price"])
 
             if result and product.get("watch"):
                 try:

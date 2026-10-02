@@ -64,8 +64,8 @@ Progreso = `(precio normal − precio actual) / (precio normal − meta)`. Avisa
 |---|---|---|
 | < 25 % | 🔴 rojo | — |
 | ≥ 25 % | 🟠 naranja | "25 % del camino" |
-| ≥ 50 % | 🟡 amarillo | "50 % del camino" |
-| ≥ 75 % | 🔵 azul | "75 % del camino" |
+| ≥ 50 % | 🔵 azul | "50 % del camino" |
+| ≥ 75 % | 🟢 verde | "75 % del camino" |
 | 100 % (≤ meta) | 🟢 verde | "¡Precio objetivo alcanzado!" |
 
 Si el precio sube y baja de tramo, vuelve a avisar cuando lo alcance otra vez. En la meta avisa de nuevo solo si el precio cambia.
