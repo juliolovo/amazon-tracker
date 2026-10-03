@@ -1,0 +1,32 @@
+{
+  "id": "B001U5206Q",
+  "history": [
+    {
+      "ts": "2026-10-02T19:11:10",
+      "price": 50.0
+    },
+    {
+      "ts": "2026-10-02T19:23:42",
+      "price": 50.0
+    },
+    {
+      "ts": "2026-10-02T19:42:17",
+      "price": 50.0
+    },
+    {
+      "ts": "2026-10-02T19:48:08",
+      "price": 50.0
+    }
+  ],
+  "last_check": "2026-10-02T19:48:08",
+  "title": "Victorinox Swiss Army Pioneer Pocket Knife, 91mm",
+  "image": "https://m.media-amazon.com/images/I/71HWeFG56hL._AC_SX569_.jpg",
+  "availability": "Only 16 left in stock (more on the way).",
+  "normal_price": null,
+  "last_error": null,
+  "progress": 0.0,
+  "level": 0,
+  "last_alert_price": null,
+  "last_level": 0,
+  "used": false
+}

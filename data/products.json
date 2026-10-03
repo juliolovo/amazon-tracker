@@ -32,8 +32,80 @@
       "watch": {
         "variant": "Black",
         "search": "OLIGHT i3E EOS black",
-        "keywords": ["olight", "i3e", "eos", "black"]
+        "keywords": [
+          "olight",
+          "i3e",
+          "eos",
+          "black"
+        ]
       }
+    },
+    {
+      "id": "B000MLS6Y4",
+      "name": "Victorinox Minichamp (Red)",
+      "url": "https://www.amazon.com/dp/B000MLS6Y4/?th=1&psc=1",
+      "target_price": 37.02,
+      "normal_price": 60.0
+    },
+    {
+      "id": "B0CKX14L34",
+      "name": "VIOFO A229 Plus Dash Cam",
+      "url": "https://www.amazon.com/dp/B0CKX14L34/?th=1&psc=1",
+      "target_price": 167.99
+    },
+    {
+      "id": "B07P6G1QWX",
+      "name": "Leatherman Free K2X",
+      "url": "https://www.amazon.com/dp/B07P6G1QWX/?th=1&psc=1",
+      "target_price": 71.96
+    },
+    {
+      "id": "B001U5206Q",
+      "name": "Victorinox Pioneer 91mm",
+      "url": "https://www.amazon.com/dp/B001U5206Q/?th=1&psc=1",
+      "target_price": 40.0
+    },
+    {
+      "id": "B001U53XSU",
+      "name": "Victorinox Swiss Tool Spirit X",
+      "url": "https://www.amazon.com/dp/B001U53XSU/?coliid=I2LOYDM10NLCHH&colid=1CFIYFEVK35AN&psc=1&ref_=list_c_wl_gv_ov_lig_pi_dp",
+      "target_price": 116.0
+    },
+    {
+      "id": "B079MJBP21",
+      "name": "Leatherman Wave Plus",
+      "url": "https://www.amazon.com/dp/B079MJBP21/?th=1&psc=1",
+      "target_price": 103.96
+    },
+    {
+      "id": "B0014VVVCK",
+      "name": "Leatherman Surge",
+      "url": "https://www.amazon.com/dp/B0014VVVCK/?th=1&psc=1",
+      "target_price": 127.96
+    },
+    {
+      "id": "B0B613R3WC",
+      "name": "Gerber Dual Force",
+      "url": "https://www.amazon.com/dp/B0B613R3WC/?th=1&psc=1",
+      "target_price": 99.86
+    },
+    {
+      "id": "B002STLQS6",
+      "name": "Leatherman Super Tool 300",
+      "url": "https://www.amazon.com/dp/B002STLQS6/",
+      "target_price": 95.96
+    },
+    {
+      "id": "B084D4Y6GV",
+      "name": "Gerber Armbar Drive (Onyx)",
+      "url": "https://www.amazon.com/gp/product/B084D4Y6GV/?th=1",
+      "target_price": 33.63
+    },
+    {
+      "id": "B005KSWIBQ",
+      "name": "Leatherman Rebar",
+      "url": "https://www.amazon.com/gp/product/B005KSWIBQ/ref=ox_sc_act_title_1?smid=A2DVLLWIYQAZXW&th=1",
+      "target_price": 65.0
     }
   ]
 }

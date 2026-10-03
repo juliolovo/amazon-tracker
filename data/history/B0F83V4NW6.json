@@ -1,7 +1,7 @@
 {
   "id": "B0F83V4NW6",
   "history": [],
-  "last_check": "2026-10-02T13:31:13",
+  "last_check": "2026-10-02T19:47:10",
   "title": "OLIGHT i3E EOS Compact Keychain Flashlight EDC Light (Summer Palm)",
   "image": "https://m.media-amazon.com/images/I/61c9okIwwsL._AC_SX569_.jpg",
   "availability": "In Stock",
@@ -9,8 +9,9 @@
     "wanted": "Black",
     "found": false,
     "available": false,
-    "checked": "2026-10-02T13:31:13"
+    "checked": "2026-10-02T19:47:10"
   },
   "last_error": null,
-  "last_alert_asin": null
+  "last_alert_asin": null,
+  "used": false
 }

@@ -65,6 +65,9 @@ LIST_PRICE_SELECTORS = [
     ".priceBlockStrikePriceString",
 ]
 
+# Elementos de precio que no son el precio del producto (bundles, "comprados juntos", carruseles)
+IN_SIDE_BLOCK_JS = "e => !!e.closest(\"[id^='bundle-expander'], #sims-fbt, #similarities_feature_div, [id*='carousel']\")"
+
 # pythonw.exe (Programador de tareas) no tiene consola: sys.stdout/stderr son None.
 LOG_DIR.mkdir(exist_ok=True)
 if sys.stdout is None or sys.stderr is None:
@@ -206,6 +209,8 @@ def scrape(page, url):
     price = None
     for sel in PRICE_SELECTORS:
         for el in page.query_selector_all(sel):
+            if el.evaluate(IN_SIDE_BLOCK_JS):  # precios de "comprados juntos" / bundles / carruseles, no del producto
+                continue
             price = parse_price(el.text_content())
             if price:
                 break
@@ -213,10 +218,12 @@ def scrape(page, url):
             break
 
     if price is None:  # precio partido en entero + fracción
-        whole = page.query_selector("#corePrice_feature_div .a-price-whole")
-        frac = page.query_selector("#corePrice_feature_div .a-price-fraction")
-        if whole:
-            price = parse_price(whole.text_content().strip().rstrip(".") + "." + (frac.text_content().strip() if frac else "00"))
+        for root in ("#corePrice_feature_div", "#corePriceDisplay_desktop_feature_div"):
+            whole = page.query_selector(f"{root} .a-price-whole")
+            frac = page.query_selector(f"{root} .a-price-fraction")
+            if whole:
+                price = parse_price(whole.text_content().strip().rstrip(".") + "." + (frac.text_content().strip() if frac else "00"))
+                break
 
     list_price = None
     for sel in LIST_PRICE_SELECTORS:
@@ -226,6 +233,10 @@ def scrape(page, url):
                 break
         if list_price:
             break
+    buybox = page.query_selector("#desktop_buybox, #buybox")
+    used_only = bool(buybox and re.match(r"\s*Buy Used", buybox.inner_text()))
+    if used_only:  # solo hay oferta de artículo usado: el precio es de un usado, no del producto nuevo
+        list_price = None
     if list_price is not None and (price is None or list_price <= price):
         list_price = None  # un "precio de lista" que no es mayor al actual no sirve como normal
 
@@ -239,7 +250,7 @@ def scrape(page, url):
                and "unavailable" not in (availability or "").lower())
 
     return {"title": title, "price": price, "list_price": list_price, "image": image, "availability": availability,
-            "buyable": buyable, "variants": scrape_variants(page)}
+            "buyable": buyable, "used_only": used_only, "variants": scrape_variants(page)}
 
 
 def scrape_variants(page):
@@ -396,6 +407,7 @@ def cmd_track(_args):
                 entry["title"] = result["title"] or entry.get("title")
                 entry["image"] = result["image"] or entry.get("image")
                 entry["availability"] = result["availability"]
+                entry["used"] = result["used_only"]  # el precio mostrado es de un artículo usado
                 if "normal_price" not in entry and not product.get("watch"):
                     entry["normal_price"] = result["list_price"]  # solo en el primer scraping; null si no tiene List Price
                     if result["list_price"] is not None:
@@ -421,6 +433,16 @@ def cmd_track(_args):
                 except Exception as e:
                     entry["last_error"] = f"{type(e).__name__}: {e}"
                     log.error("%s: %s", pid, entry["last_error"])
+            elif result and result["price"] is not None and result["used_only"]:
+                # Precio de usado: se registra y se muestra con etiqueta, pero no cuenta para la meta ni las alertas
+                entry["history"].append({"ts": now, "price": result["price"], "used": True})
+                entry["last_error"] = None
+                for k in ("progress", "level"):
+                    entry.pop(k, None)
+                entry["last_alert_price"] = None
+                entry["last_level"] = 0
+                log.info("%s: $%.2f (USADO, no cuenta para la meta $%.2f) %s", pid, result["price"],
+                         float(product["target_price"]), (entry.get("title") or "")[:50])
             elif result and result["price"] is not None:
                 price = result["price"]
                 entry["history"].append({"ts": now, "price": price})
@@ -484,6 +506,10 @@ def cmd_track(_args):
 def cmd_add(args):
     cfg = load_json(PRODUCTS_FILE, {"settings": DEFAULT_SETTINGS, "products": []})
     asin = extract_asin(args.url)
+    exists = any(product_id(p) == asin for p in cfg["products"])
+    if exists and not args.update:
+        print(f"Ya existe {asin}; no se agregó (usa --update para reemplazarlo)")
+        sys.exit(1)
     cfg["products"] = [p for p in cfg["products"] if product_id(p) != asin]
     item = {"id": asin, "name": args.name or "", "url": args.url, "target_price": args.target}
     if args.normal is not None:
@@ -540,8 +566,9 @@ def main():
     parser = argparse.ArgumentParser(description="Amazon Price Tracker")
     sub = parser.add_subparsers(dest="cmd")
 
-    a = sub.add_parser("add", help="Agregar o actualizar un producto")
+    a = sub.add_parser("add", help="Agregar un producto (rechaza duplicados)")
     a.add_argument("url")
+    a.add_argument("--update", action="store_true", help="Reemplazar el producto si ya existe")
     a.add_argument("--target", type=float, required=True, help="Precio meta")
     a.add_argument("--normal", type=float, help="Precio normal")
     a.add_argument("--name", help="Nombre corto")

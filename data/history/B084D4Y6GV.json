@@ -1,0 +1,32 @@
+{
+  "id": "B084D4Y6GV",
+  "history": [
+    {
+      "ts": "2026-10-02T19:12:24",
+      "price": 43.57
+    },
+    {
+      "ts": "2026-10-02T19:24:59",
+      "price": 43.57
+    },
+    {
+      "ts": "2026-10-02T19:43:38",
+      "price": 42.36
+    },
+    {
+      "ts": "2026-10-02T19:49:22",
+      "price": 42.36
+    }
+  ],
+  "last_check": "2026-10-02T19:49:22",
+  "title": "Gerber Armbar Drive EDC Pocket Knife Multitool with Bottle Opener, Onyx",
+  "image": "https://m.media-amazon.com/images/I/716TCWPFQ7L._AC_SX569_.jpg",
+  "availability": "In Stock",
+  "normal_price": null,
+  "last_error": null,
+  "progress": 12.2,
+  "level": 0,
+  "last_alert_price": null,
+  "last_level": 0,
+  "used": false
+}

@@ -1,0 +1,32 @@
+{
+  "id": "B0B613R3WC",
+  "history": [
+    {
+      "ts": "2026-10-02T19:12:00",
+      "price": 124.83
+    },
+    {
+      "ts": "2026-10-02T19:24:36",
+      "price": 124.83
+    },
+    {
+      "ts": "2026-10-02T19:43:13",
+      "price": 124.83
+    },
+    {
+      "ts": "2026-10-02T19:48:59",
+      "price": 124.83
+    }
+  ],
+  "last_check": "2026-10-02T19:48:59",
+  "title": "GERBER 1059828 Dual Force Multi-Tool, Silver",
+  "image": "https://m.media-amazon.com/images/I/51qcXcRCZoL._AC_SX569_.jpg",
+  "availability": "In Stock",
+  "normal_price": null,
+  "last_error": null,
+  "progress": 0.0,
+  "level": 0,
+  "last_alert_price": null,
+  "last_level": 0,
+  "used": false
+}

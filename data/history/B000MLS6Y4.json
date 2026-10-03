@@ -1,0 +1,32 @@
+{
+  "id": "B000MLS6Y4",
+  "history": [
+    {
+      "ts": "2026-10-02T19:10:30",
+      "price": 46.27
+    },
+    {
+      "ts": "2026-10-02T19:23:03",
+      "price": 46.27
+    },
+    {
+      "ts": "2026-10-02T19:41:35",
+      "price": 46.27
+    },
+    {
+      "ts": "2026-10-02T19:47:30",
+      "price": 46.27
+    }
+  ],
+  "last_check": "2026-10-02T19:47:30",
+  "title": "Victorinox Swiss Army Minichamp Pocket Knife, Red, 58mm",
+  "image": "https://m.media-amazon.com/images/I/71N+K82lbJL._AC_SX569_.jpg",
+  "availability": "In Stock",
+  "normal_price": 60.0,
+  "last_error": null,
+  "progress": 59.7,
+  "level": 2,
+  "last_alert_price": null,
+  "last_level": 2,
+  "used": false
+}

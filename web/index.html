@@ -113,6 +113,10 @@
   .phead h2 { margin: 0; font-size: 15px; font-weight: 600; }
   .count { font-size: 12px; font-weight: 600; color: var(--text-secondary); background: var(--neutral-bg); border-radius: 999px; padding: 1px 8px; font-variant-numeric: tabular-nums; }
 
+  .sort { margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+  .sort button { padding: 3px 10px; font-size: 12px; }
+  .sort button[aria-pressed="true"] { background: var(--series-1); border-color: var(--series-1); color: #fff; font-weight: 600; }
+
   .plist { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
   .prow { display: flex; align-items: center; gap: 14px; padding: 12px 16px; color: inherit; text-decoration: none; border-top: 1px solid var(--border); }
   .prow:first-child { border-top: 0; }
@@ -160,6 +164,7 @@
   .badge.good { background: var(--good-bg); color: var(--good-text); }
   .badge.wait { background: var(--neutral-bg); color: var(--text-secondary); }
   .badge.err { background: var(--critical-bg); color: var(--critical); }
+  .badge.used { background: var(--neutral-bg); color: var(--text-secondary); box-shadow: 0 0 0 1px var(--border) inset; }
 
   .prices { display: flex; gap: 24px; flex-wrap: wrap; margin: 16px 0 8px; align-items: center; }
   .now { font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
@@ -215,6 +220,14 @@ const asinOf = url => (url.match(/\/(?:dp|gp\/product|gp\/aw\/d|product)\/([A-Z0
 let charts = [];
 let lastData = null;
 
+// Orden de la lista principal: por nombre (default) o por precio actual (menor a mayor, sin precio al final)
+const SORTS = {
+  name: { label: "Nombre", cmp: (a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base", numeric: true }) },
+  price: { label: "Precio", cmp: (a, b) => (a.current ?? Infinity) - (b.current ?? Infinity) || SORTS.name.cmp(a, b) },
+};
+let sortBy = "name";
+try { const s = localStorage.getItem("sortBy"); if (s in SORTS) sortBy = s; } catch {}
+
 async function load() {
   const cfg = await fetch("/data/products.json").then(r => r.json());
   // Un archivo de histórico por producto: data/history/<ASIN>.json
@@ -243,6 +256,9 @@ function progressOf(p, price, pts) {
   if (base == null || base <= p.target_price) return 0;
   return Math.max(0, (base - price) / (base - p.target_price) * 100);
 }
+// Líneas de rango en el gráfico: también para precios de usado (así se ve qué tan lejos está de la meta)
+const showLevels = it => it.level != null || (it.used && it.p.target_price != null
+  && (baseOf(it.p, it.pts) ?? 0) > it.p.target_price);
 const levelOf = pct => LEVELS.reduce((acc, lv, i) => pct + 1e-6 >= lv.min ? i : acc, 0);
 const priceAt = (p, pts, pct) => baseOf(p, pts) - (baseOf(p, pts) - p.target_price) * pct / 100;
 
@@ -259,17 +275,19 @@ function buildItems() {
     const min = prices.length ? Math.min(...prices) : null;
     const max = prices.length ? Math.max(...prices) : null;
     const watch = p.watch ? (h.watch || { wanted: p.watch.variant, found: false, available: false }) : null;
-    const hit = watch ? watch.available : current != null && p.target_price != null && current <= p.target_price;
-    const pct = !watch && current != null && p.target_price != null ? progressOf(p, current, pts) : null;
+    const used = !watch && !!h.used;  // el precio actual es de un artículo usado: no cuenta para la meta
+    const hit = watch ? watch.available : !used && current != null && p.target_price != null && current <= p.target_price;
+    const pct = !watch && !used && current != null && p.target_price != null ? progressOf(p, current, pts) : null;
     const level = pct != null ? levelOf(pct) : null;
     const name = p.name || h.title || id;
     const link = watch && watch.found ? watch.url : p.url;
-    return { p, id, h, pts, current, min, max, watch, hit, name, link, pct, level };
+    return { p, id, h, pts, current, min, max, watch, hit, name, link, pct, level, used };
   });
 }
 
-function badgeHTML({ p, h, current, hit, watch, pct, level }) {
+function badgeHTML({ p, h, current, hit, watch, pct, level, used }) {
   if (h.last_error && (current == null || watch)) return `<span class="badge err">⚠ Error</span>`;
+  if (used) return `<span class="badge used" title="Solo hay oferta de artículo usado">Usado</span>`;
   if (watch) return hit ? `<span class="badge good">✓ Disponible</span>`
     : `<span class="badge wait">${watch.found ? "Sin stock" : "Esperando"} · ${esc(watch.wanted)}</span>`;
   if (level != null) return `<span class="badge lvl" style="background:var(--lvl-${level});color:var(--lvl-ink-${level})">${Math.floor(pct)} %</span>`;
@@ -305,6 +323,11 @@ function render() {
     document.title = selected.name + " · Price Tracker";
   } else {
     document.title = "Price Tracker";
+    view.querySelectorAll("[data-sort]").forEach(b => b.addEventListener("click", () => {
+      sortBy = b.dataset.sort;
+      try { localStorage.setItem("sortBy", sortBy); } catch {}
+      render();
+    }));
   }
 }
 
@@ -312,15 +335,20 @@ function listHTML(items) {
   if (!items.length) {
     return `<div class="empty">No hay productos. Agrega uno con<br><code>python tracker.py add URL --target 25 --normal 32.99</code></div>`;
   }
+  const sorted = [...items].sort(SORTS[sortBy].cmp);
   return `
   <nav class="plist" aria-label="Productos">
-    <div class="phead"><h2>Productos</h2><span class="count">${items.length}</span></div>
-    ${items.map(it => `
+    <div class="phead"><h2>Productos</h2><span class="count">${items.length}</span>
+      <span class="sort" role="group" aria-label="Ordenar por">Ordenar:
+        ${Object.entries(SORTS).map(([k, s]) => `<button type="button" data-sort="${k}" aria-pressed="${k === sortBy}">${s.label}</button>`).join("")}
+      </span>
+    </div>
+    ${sorted.map(it => `
     <a class="prow" href="#/${encodeURIComponent(it.id)}"${it.level != null ? ` style="--row-color:var(--lvl-${it.level})"` : ""}>
       ${it.h.image ? `<img class="thumb sm" src="${esc(it.h.image)}" alt="">` : `<span class="thumb sm"></span>`}
       <span class="pinfo">
         <span class="pname">${esc(it.name)}</span>
-        <span class="meta">${esc(it.id)} · ${it.watch ? `vigila color ${esc(it.watch.wanted)}` : `meta ${fmt(it.p.target_price)}${it.current != null && it.current > it.p.target_price ? ` · faltan ${fmt(it.current - it.p.target_price)}` : ""}`}</span>
+        <span class="meta">${esc(it.id)} · ${it.watch ? `vigila color ${esc(it.watch.wanted)}` : `meta ${fmt(it.p.target_price)}${it.used ? " · precio de usado" : it.current != null && it.current > it.p.target_price ? ` · faltan ${fmt(it.current - it.p.target_price)}` : ""}`}</span>
       </span>
       <span class="pprice">${fmt(it.current)}</span>
       ${badgeHTML(it)}
@@ -377,7 +405,7 @@ function detailHTML(it) {
     <div class="chart"><canvas aria-label="Historial de precio de ${esc(name)}" role="img"></canvas></div>
     <div class="legend">
       <span><i class="sw" style="border-color:var(--text-primary)"></i>Actual</span>
-      ${it.level != null ? LEVELS.map((lv, i) => `<span><i class="sw dash" style="border-color:var(--lvl-${i})"></i>${lv.short}</span>`).join("") : ""}
+      ${showLevels(it) ? LEVELS.map((lv, i) => `<span><i class="sw dash" style="border-color:var(--lvl-${i})"></i>${lv.short}</span>`).join("") : ""}
     </div>
     <div class="foot">
       <span class="meta">${h.last_check ? "Revisado " + fmtDate(h.last_check) : ""}</span>
@@ -423,7 +451,7 @@ function drawChart(canvas, it) {
     pointBorderWidth: 2, stepped: "before", tension: 0,
   }];
   // Una línea por tramo: normal (rojo), 25 % (naranja), 50 % (azul), 75 % y meta (verde)
-  if (it.level != null) LEVELS.forEach((lv, i) => datasets.push({
+  if (showLevels(it)) LEVELS.forEach((lv, i) => datasets.push({
     label: lv.short, data: ref(priceAt(p, pts, lv.min)), borderColor: css(`--lvl-${i}`),
     borderDash: i === 0 || i === 4 ? [6, 4] : [2, 4], borderWidth: i === 0 || i === 4 ? 1.5 : 1.25,
     pointRadius: 0, pointHoverRadius: 0,

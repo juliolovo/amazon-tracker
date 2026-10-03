@@ -1,0 +1,32 @@
+{
+  "id": "B0014VVVCK",
+  "history": [
+    {
+      "ts": "2026-10-02T19:11:47",
+      "price": 159.95
+    },
+    {
+      "ts": "2026-10-02T19:24:21",
+      "price": 159.95
+    },
+    {
+      "ts": "2026-10-02T19:42:59",
+      "price": 159.95
+    },
+    {
+      "ts": "2026-10-02T19:48:47",
+      "price": 159.95
+    }
+  ],
+  "last_check": "2026-10-02T19:48:47",
+  "title": "LEATHERMAN, Surge, 21-in-1 Heavy-Duty Multi-tool for Work, Home, Garden, DIY & Auto, Stainless Steel",
+  "image": "https://m.media-amazon.com/images/I/612YVe3N3+L._AC_SX569_.jpg",
+  "availability": "In Stock",
+  "normal_price": null,
+  "last_error": null,
+  "progress": 0.0,
+  "level": 0,
+  "last_alert_price": null,
+  "last_level": 0,
+  "used": false
+}

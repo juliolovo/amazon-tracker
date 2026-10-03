@@ -1,0 +1,32 @@
+{
+  "id": "B07P6G1QWX",
+  "history": [
+    {
+      "ts": "2026-10-02T19:10:56",
+      "price": 89.95
+    },
+    {
+      "ts": "2026-10-02T19:23:30",
+      "price": 89.95
+    },
+    {
+      "ts": "2026-10-02T19:42:02",
+      "price": 89.95
+    },
+    {
+      "ts": "2026-10-02T19:47:56",
+      "price": 89.95
+    }
+  ],
+  "last_check": "2026-10-02T19:47:56",
+  "title": "LEATHERMAN FREE K2X Folding Pocketknife 8-in-1, Serrated",
+  "image": "https://m.media-amazon.com/images/I/619rSijc-KL._AC_SX569_.jpg",
+  "availability": "In Stock",
+  "normal_price": null,
+  "last_error": null,
+  "progress": 0.0,
+  "level": 0,
+  "last_alert_price": null,
+  "last_level": 0,
+  "used": false
+}

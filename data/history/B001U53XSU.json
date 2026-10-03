@@ -1,0 +1,32 @@
+{
+  "id": "B001U53XSU",
+  "history": [
+    {
+      "ts": "2026-10-02T19:11:23",
+      "price": 145.0
+    },
+    {
+      "ts": "2026-10-02T19:23:53",
+      "price": 145.0
+    },
+    {
+      "ts": "2026-10-02T19:42:29",
+      "price": 145.0
+    },
+    {
+      "ts": "2026-10-02T19:48:22",
+      "price": 145.0
+    }
+  ],
+  "last_check": "2026-10-02T19:48:22",
+  "title": "Victorinox Swiss Tool Spirit X Multi Tool, 24 Functions & Leather Pouch",
+  "image": "https://m.media-amazon.com/images/I/51T0+Dl0p3L._AC_SX569_.jpg",
+  "availability": "In Stock",
+  "normal_price": null,
+  "last_error": null,
+  "progress": 0.0,
+  "level": 0,
+  "last_alert_price": null,
+  "last_level": 0,
+  "used": false
+}
